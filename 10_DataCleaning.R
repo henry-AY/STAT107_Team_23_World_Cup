@@ -1,9 +1,7 @@
-
 ## Reading in Dataset
-df_group_standings <- read_csv("Downloads/group_standings.csv")
-View(df_group_standings)
-
+df_group_standings <- read_csv("group_standings.csv", show_col_types = FALSE)
 head(df_group_standings, 200)
+
 
 
 
