@@ -1,0 +1,66 @@
+---
+title: "FinalReport"
+output: pdf_document
+date: "2025-11-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Necessary Librarys
+```{r}
+source("00_requirments.R")
+```
+
+## Reading in Datasets
+## Pre Processing (Data Cleaning/Processing)
+
+```{r}
+source("10_DataCleaning.R")
+```
+
+
+## Preliminary EDA ()
+```{r}
+source("11_PreliminaryEDA.R")
+```
+
+### Relationship between goals scored and points
+
+#### Plot Analysis (Relationship between Goals Scored and Points)
+This graph plots the relationship between goals scored and points throughout the tournament(s), and there exists an expectation; teams that score more goals will tend to earn more points. Thus, given this plot gives a positive linear relationship the plot behaves as an initial sanity check of the dataset. Looking into the graph, we can see that most teams score less than 10 goals scored throughout the tournament, suggesting the majority of the teams have a strong defense or the games are low-scoring (a hypothesis worth exploring further). Additionally, a large cluster of teams is around the 4 points and less than 5 goals scored, this shows us that majority of teams do not advance far into the tournament. Conversely, teams outside these ranges like correspond to teams progressing to the later stages of the tournament, which can be an invaluable trend that can help towards predicting future games.
+
+
+### Histogram - Points Distribution: Advanced vs. Not Advanced 
+
+#### Histogram Analysis (Advanced vs. Not Advanced)
+This histogram shows us the point distribution for all the teams in the World Cup. The red and green differentiate teams that advanced to the next round, which is green, and the teams that did not advance to the next round, which is in red. As we can see from the histogram, the max points a team that didn't advance was 4 and the minimum a team got that did advance was about. Logically this would make sense, as better teams would show a stronger defense in matches, therefore the teams that didn't advance would produce lower points in those matches. And vice verse for points scored. A better team would also have a stronger offense, therefore their points in the histogram would show as much higher than the teams that didn't advance. This is a good insight to look at because we can base our future prediction off of higher scoring teams, as it shows some relation to advancing teams. 
+
+
+### Scatterplot - Goals For vs. Goals Against 
+
+#### Scatter Plot Analysis (Goals For vs. Goals Against)
+Something to note for this scatter plot to begin with is the bottom-left represents a low scoring game (defensively, low scoring teams). The top-left shows a high scoring game. The bottom right corner shows a strong defensive and offensive game which is the ideal game for advancing teams. And the top right corner would represent the opposite, a weak game, both defensively and offensively. From the scatter plot we see the green, or advancing teams, are congregating in the bottom right corner of the plot while the red, or not advancing teams, are more clustered from very bottom left to top right corner. This is another good insight to note for advancing teams will normally have higher goals_for and lower goals_against for them to advance. The goals against is something we can also look at for future predictions we want to make about the world cup. 
+
+
+### Logistic Regression (Best prediction factors)
+
+#### Logistic Regression Analysis (Model)
+Using logistic regression on the group standings performance variables, we found three variables to be best predictors out of all of the variables. Played games, draws, and wins were the three variables that created the lowest model AIC from all the variables. Using backwards step wise selection, we take out any variables that has a higher AIC than the model AIC because once removed, the model AIC goes lower. And from that we reached a model with the three variables mentioned earlier as great predictors for weather a team advances or not. 
+
+
+#### Logistic Regression Analysis (Model 2)
+We made another model, however only using 4 of the variables to look a more performance based model. From this we see that the last model shows the variables goal_difference and points. These two variables made for the lowest AIC score and the best predictors out of the 4 variables used in the second model. We see that the second models AIC score (366.50) is higher than the first models AIC score (285.06), however they capture different results. The first model provides variables that show direct outcomes of a game like wins and draws. The second model provides variables that use the performance of the team in a game, such as points scored and the goal_difference between the teams for that game. 
+
+
+
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+
+## Including Plots
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
