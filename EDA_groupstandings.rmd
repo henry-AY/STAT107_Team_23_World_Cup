@@ -10,45 +10,31 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-# Install dependencies here (if necessary, change to 00_req text)
-library(tidyverse)
-library(stringr)
+# Install req text
+source("00_requirements.R")
 
+# import cleaning function
+source("clean_group_standings.R")
 ```
 
 ```{r}
-df_group_standings <- read_csv("group_standings.csv")
+df_group_standings <- clean_group_standings("group_standings.csv")
 
 head(df_group_standings, 200)
-```
-
-```{r}
-# Basic cleaning
-df_group_standings_clean <- df_group_standings[, c("tournament_id", "team_name", "team_code", "played", "wins", "draws", "losses", "goals_for", "goals_against", "goal_difference", "points", "advanced")]
-
-df_group_standings_clean <- mutate(
-  df_group_standings_clean,
-  across(where(is.character), trimws),
-  across(c(played, wins, draws, losses, goals_for, goals_against, goal_difference, points, advanced), as.numeric)
-)
-
-df_group_standings_clean$year <- sub(".*(\\d{4}).*", "\\1", df_group_standings_clean$tournament_id)
-
-head(df_group_standings_clean)
 ```
 
 ## Exploratory Data Analysis (visualizations)
 
 ### Relationship between goals scored and points
 ```{r}
-plot(jitter(df_group_standings_clean$goals_for),
-     jitter(df_group_standings_clean$points),
+plot(jitter(df_group_standings$goals_for),
+     jitter(df_group_standings$points),
      xlab = "Goals Scored",
      ylab = "Points Earned",
      main = "Relationship between goals scored and points",
      pch = 1)
 
-model <- lm(points ~ goals_for, data = df_group_standings_clean)
+model <- lm(points ~ goals_for, data = df_group_standings)
 abline(model, col="blue")
 ```
 
