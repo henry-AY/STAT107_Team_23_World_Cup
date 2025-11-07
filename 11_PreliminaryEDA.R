@@ -11,7 +11,6 @@ model <- lm(points ~ goals_for, data = df_group_standings_clean)
 abline(model, col="blue")
 
 
-
 ### Histogram - Points Distribution: Advanced vs. Not Advanced 
 hist(df_group_standings_clean$points[df_group_standings_clean$advanced == 1], 
      col = rgb(0, 1, 0, 0.5), 
@@ -21,7 +20,7 @@ hist(df_group_standings_clean$points[df_group_standings_clean$advanced == 1],
      ylim = c(0, max(table(df_group_standings_clean$points)))
 )
 hist(df_group_standings_clean$points[df_group_standings_clean$advanced == 0], 
-     col = rgb(1, 0, 0, 0.5),  # red with transparency
+     col = rgb(1, 0, 0, 0.5), 
      add = TRUE
 )
 
