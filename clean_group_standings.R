@@ -2,7 +2,7 @@
 
 clean_group_standings <- function(filepath) {
   ## Reading in Dataset
-  df_group_standings <- read_csv("group_standings.csv", show_col_types = FALSE)
+  df_group_standings <- read_csv(filepath, show_col_types = FALSE)
   head(df_group_standings, 200)
   
   
