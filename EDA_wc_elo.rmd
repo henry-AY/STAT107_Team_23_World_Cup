@@ -15,19 +15,19 @@ library(dplyr)
 source("00_requirements.R")
 
 # import cleaning function
-source("clean_elo_with_qualified_wc.R")
+source("01_dataset_preprocessing.R")
 ```
 
 ```{r}
 elo_wc <- add_wc_matches_to_elo( 
-  elo_filepath = "C:/Users/refug/OneDrive/Documents/STAT107_Team_23_World_Cup/ranking_soccer_1901-2023.csv", 
-  wc_perf_filepath = "C:/Users/refug/OneDrive/Documents/STAT107_Team_23_World_Cup/qualified_teams.csv"
+  elo_filepath = "data/national_ranking_soccer_1901-2023.csv", 
+  wc_perf_filepath = "data/qualified_teams.csv"
 )
 
 head(elo_wc)
 ```
 ```{r}
-write_csv(elo_wc, "data/elo_with_wc_data.csv")
+write_csv(elo_wc, "data/primary_dataset_wc_elo.csv")
 ```
 
 
