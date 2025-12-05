@@ -1,7 +1,20 @@
 
 count_match_prediction <- function(year) {
-  
   library(randomForest)
+  
+  national_ranks <- read.csv("data/national_ranking_soccer_1901-2023.csv")
+  wc_elo <- read.csv("data/primary_dataset_wc_elo.csv")
+  qualified_teams <- read.csv("data/qualified_teams.csv")
+  
+  wc_elo$world_cup_year <- as.factor(wc_elo$world_cup_year)
+  wc_elo$team_name <- as.factor(wc_elo$team_name)
+  wc_elo$elo_rating <- as.numeric(wc_elo$elo_rating)
+  wc_elo$elo_rank <- as.numeric(wc_elo$elo_rank)
+  wc_elo$elo_1yr_change_rating <- as.numeric(wc_elo$elo_1yr_change_rating)
+  wc_elo$win_ratio <- as.numeric(wc_elo$win_ratio)
+  wc_elo$goals_ratio <- as.numeric(wc_elo$goals_ratio)
+  wc_elo$count_matches <- as.numeric(wc_elo$count_matches)
+  
   rf_model <- randomForest(count_matches ~ elo_rating + win_ratio + goals_ratio + elo_rank, data = wc_elo)
   
   
@@ -17,8 +30,8 @@ count_match_prediction <- function(year) {
   wc_year_prediction$error <- wc_year_prediction$predicted_count_matches - wc_year_prediction$count_matches
   
   ## calculate the model accuracy in a data frame
-  actual <- wc_2018_prediction$count_matches
-  pred <- wc_2018_prediction$predicted_count_matches
+  actual <- wc_year_prediction$count_matches
+  pred <- wc_year_prediction$predicted_count_matches
   
   RMSE <- sqrt(mean((pred - actual)^2))
   

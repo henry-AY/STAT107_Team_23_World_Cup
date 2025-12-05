@@ -13,9 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, warning=FALSE}
-national_ranks <- read.csv("Downloads/national_ranking_soccer_1901-2023.csv")
-wc_elo <- read.csv("Downloads/primary_dataset_wc_elo.csv")
-qualified_teams <- read.csv("Downloads/qualified_teams.csv")
+national_ranks <- read.csv("data/national_ranking_soccer_1901-2023.csv")
+wc_elo <- read.csv("data/primary_dataset_wc_elo.csv")
+qualified_teams <- read.csv("data/qualified_teams.csv")
 ```
 
 ```{r, echo = FALSE}

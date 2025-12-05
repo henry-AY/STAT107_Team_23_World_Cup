@@ -27,7 +27,6 @@ We approached this project, by first selecting two datasets that include informa
 The data used for this analysis was sourced both from open-source GitHub repositories, a popular platform for sharing data and code projects, that provides publicly available data. The first dataset is from [JGavier](https://github.com/JGravier/soccer-ELO/blob/main/csv/ranking_soccer_1901-2023.csv), which includes data from 1901 to present day, with variables: rank, ELO, rating/rank changes, and total yearly match data. 
 
 ELO is a formulaic way to represent team strength ratings in a weighted manner for any tournament-based event. The formula used to calculate the ELO values comes from [eloratings.net](https://www.eloratings.net/about).
-
 $$R_n = R_o + K \times (W - W_e)$$
 Where, $R_n$ is the new rating, $R_o$ is the pre-match rating, $K$ is a constant weight for the tournaments played. $W$ is the result of the game (1 for win, 0.5 for draw, 0 for loss) and $W_e$ is the win expectancy from previous data and team strength.
 
@@ -48,7 +47,7 @@ df_clean = read.csv("data/primary_dataset_wc_ELO.csv")
 
 cat("Dataset size: ", nrow(df_clean), "rows and", ncol(df_clean), "columns\n")
 
-head(df_clean, 10)
+head(df_clean, 3)
 ```
 
 This chunk is to show the cleaned Dataset size (316 x 8) and also give a peek into the dataset, so that its easier to understand what sort of data is being used in this project.
@@ -58,22 +57,95 @@ This chunk is to show the cleaned Dataset size (316 x 8) and also give a peek in
 
 We used several visualization techniques in order to asses the correlation and nature of our variables and data to determine optimal tests and models to use for our project. These first set of graphs include visualizations, to explore the dataset, which will be further explored bELOw:
 
-#### Goals vs. ELO Ratings
+### Goals vs. ELO Ratings
 
 > Insert image of graph here
 
 This scatterplot plots the Goals scored for per match in the World Cup versus the teams ELO ratings. It shows a clear, positive linear relationship between the two variables. While there is some noticeable variability, teams with higher ELO ratings generally tend to score more goals per match, as seen by the upward-sloping regression line. ELO summarizes long-term team performance and competitive strength before the tournament, and we can see that this rating is a relevant predictor for a teams offensive capabilities. Additionally, this scatterplot behaves as a 'sanity' check for our data, to verify that the expected relationship exists (linear and positive).
 
-#### Goals Per Match over years for Top−Scoring Teams
+### Goals Per Match over years for Top−Scoring Teams
 
 > Insert image of graph here
 
 This line graph tracks how the highest-scoring teams in our dataset from various World cup years from 1982 - present (hence the West Germany). While the specific levels vary team by team, the majority of the teams show a gradual decline and/or stabilization in goals per match over time. Ultimately, this reflects more broad trends in global soccer, including more balanced tournament competition amongs the teams and potentially more emphasis on defensive plays. We can also see that historically strong teams, such as Brazil and Germany maintain a relatively consistent scores. These patterns suggest that past scoring behavior can be useful for predicting future scoring, which is parallel to our main question.
 
-#### Correlation Heatmap
+### Correlation Heatmap
 
 Here, we can visualize and assess how the key numeric variables in our dataset (ELO rating, recent performance, match count, and goal scoring) all relate with one another.
 
 > Insert image of heatmap here
 
 As seen in the heatmap, goals per match shows strong positive correlation with win ratio, and moderate positive correlation with ELO rating. This indicates that the teams who win more and have higher pre-tournament strength tend to score more goals. Match count is also positively correlated to goals and ELO, showing that stronger teams have the ability to not only advance further, but also have a stronger offensive. This is an interesting discovery, and something we can further explore with a linear model to determine which variables are most significant with match count beyond a correlation value. Additionally, ELO rank is strongly negatively correlated with ELO rating (i.e. 1989, 1244...) as higher ranks (i.e. Rank 1, 2, 3...) indicate stronger teams. Overall, these relationships should provide strong support for ELO-based and performance-based variables in our predictive models in answering our main question. 
+
+## Analysis 
+
+The main goal of our analysis is to understand which variables are most predictive of how many matches a team plays in the World Cup, so we can later build a stronger model for forecasting the 2026 tournament. We are first using linear models as exploratory models, and not as final predictors. 
+We are not fitting linear models to `count_matches` directly, because the relationship between match progression and performance statistics is non-linear and threshold-driven. Instead, we want to use linear models in an exploratory way, to find which predictors consistently carry statistical significance across related performance outcomes. We can use these findings to guide our decision making for the final model, and what predicators would be best.
+
+```{r, warning=FALSE, echo = FALSE, include = FALSE}
+national_ranks <- read.csv("data/national_ranking_soccer_1901-2023.csv")
+wc_elo <- read.csv("data/primary_dataset_wc_elo.csv")
+qualified_teams <- read.csv("data/qualified_teams.csv")
+```
+
+```{r, echo = FALSE, include = FALSE}
+wc_elo$world_cup_year <- as.factor(wc_elo$world_cup_year)
+wc_elo$team_name <- as.factor(wc_elo$team_name)
+wc_elo$elo_rating <- as.numeric(wc_elo$elo_rating)
+wc_elo$elo_rank <- as.numeric(wc_elo$elo_rank)
+wc_elo$elo_1yr_change_rating <- as.numeric(wc_elo$elo_1yr_change_rating)
+wc_elo$win_ratio <- as.numeric(wc_elo$win_ratio)
+wc_elo$goals_ratio <- as.numeric(wc_elo$goals_ratio)
+wc_elo$count_matches <- as.numeric(wc_elo$count_matches)
+```
+
+### Linear Model 1: Predicting ELO ratings with performance based variables
+
+In the first linear model, we will be predicting the ELO ratings with performance based variables: `win_ratio`, and `goals_ratio`. From the EDA, we know that the number of matches played in the World Cups is moderately positively correlated with ELO rating. 
+
+```{r, echo = FALSE}
+performance_based_elo_model <- lm(elo_rating ~ win_ratio + goals_ratio, data = wc_elo)
+summary(performance_based_elo_model)
+```
+This gives us an $R^2$ of 0.2496, or 24.96%, meaning 24.96% of the variance of the ELO ratings from the teams can be explained by performance based variables: `win_ratio`, and `goals_ratio`. The linear model struggling on this data makes sense, as soccer data is inheriently messy and non-linear, so this is something we expected. 
+
+However, interestingly, we can see that the `goals_ratio` variable is extremely statistically significant, with a $p < 0.001$. These are all observations that we need to take into account for the final model.
+
+### Linear Model 2: Predicting win ratio with elo rating and performance based variables
+
+In the second linear model, we will be predicting the win ratio with ELO rating performance based variables: `win_ratio`, and `goals_ratio`. From the EDA, we know that the number of matches played in the World Cups has a low positive correlation with the win ratio. This makes sense logically, especially because they're different observations with different targets.
+
+```{r, echo=FALSE}
+win_ratio_by_scoring_model <- lm(win_ratio ~ elo_rating + goals_ratio + count_matches, data = wc_elo)
+summary(win_ratio_by_scoring_model)
+```
+This gives us an $R^2$ of 0.04654 meaning 4.65% of the variance in the win ratio from the teams can be explained by ELO and performance based variables: `win_ratio`, and `goals_ratio`. Similar to the first model, what we're seeing is that the linear model is too rigid for data that is constantly changing and does not move in a linear manner. 
+
+Similarly, interestingly, we can see that `goals_ratio` is a statistically significant predictor, with a $p < 0.001$. Again, this suggests that the goals ratio has a strong signal and will be valuable in our main model.
+
+### Linear Model Results
+
+The linear models unperformed, which is expected because of how World Cup progression works. Match outcomes are heavily non-linear. This suggests, that for our primary model, the best option would be a random forest, as it is appropriate for the data types and can handle non-linear relationships. Additionally, after the analysis, we think the pest predictors for `count_matches` for a random forest are:
+
+* `goals_ratio` consistently showed up as statistically significant across both models.
+* `win_ration` is unstable and not significant linearly, but still relevant conceptually for non-linear models. 
+* `elo_rating` is moderately correlated with match progression, but the relationship is non-linear.
+* `elo_rank` effectively the inverse of ELO rating, included as an aleternate representation of team strength.
+
+### Random Forest Model
+
+Predicting for 2022
+
+```{r, echo = FALSE, warning=FALSE, include = FALSE}
+source("RandomForestFunction.R")
+```
+
+```{r, warning = FALSE, echo = FALSE}
+count_match_prediction(2022)
+```
+
+## Conclusion
+
+> Insert conclusion here
+
+## References
