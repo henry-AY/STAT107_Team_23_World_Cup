@@ -1,0 +1,132 @@
+---
+title: "STAT_107_Soccer_Project"
+output:
+  pdf_document: default
+  html_document: default
+date: "2025-12-04"
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=FALSE}
+national_ranks <- read.csv("data/national_ranking_soccer_1901-2023.csv")
+wc_elo <- read.csv("data/primary_dataset_wc_elo.csv")
+qualified_teams <- read.csv("data/qualified_teams.csv")
+```
+
+```{r, echo = FALSE}
+wc_elo$world_cup_year <- as.factor(wc_elo$world_cup_year)
+wc_elo$team_name <- as.factor(wc_elo$team_name)
+wc_elo$elo_rating <- as.numeric(wc_elo$elo_rating)
+wc_elo$elo_rank <- as.numeric(wc_elo$elo_rank)
+wc_elo$elo_1yr_change_rating <- as.numeric(wc_elo$elo_1yr_change_rating)
+wc_elo$win_ratio <- as.numeric(wc_elo$win_ratio)
+wc_elo$goals_ratio <- as.numeric(wc_elo$goals_ratio)
+wc_elo$count_matches <- as.numeric(wc_elo$count_matches)
+```
+# Linear Modeling
+
+Here we are looking at the lm() function and looking at which variables
+are significant to the independent variable by looking at their
+p-values. We are using elo rank as the independent variable because the
+elo_rank tells us how well the countries team did in the pre-season
+prior to the world cup
+
+## Model 1
+Predicting elo_ratings using performance based variables
+```{r}
+performance_based_elo_model <- lm(elo_rating ~ win_ratio + goals_ratio, data = wc_elo)
+summary(performance_based_elo_model)
+```
+Using Poland's 1982 world cup pre-season stats, we can see if the model
+we made was accurate and how precise the model was by using the
+variables used in the model, with Poland stats for that year.
+
+1982 (world cup year) Poland (team name) 1959 (elo_rating) 5 (elo rank)
+12 (elo 1yr change) 0.4248705 (win ratio) 1.948187 (goal ratio) 7 (count
+matches)
+
+```{r}
+performance_based_elo_prediction <- data.frame(win_ratio = 0.4248705, goals_ratio = 1.948187)
+predict(performance_based_elo_model, newdata = performance_based_elo_prediction, type = "response")
+```
+So the predicted elo we got from the model using performance based
+variables from Poland for 1982 was within 90.688 points at 1868.312,
+which is realistically close for how high the elo rating can get. This
+shows that the model is not necessarily the best but can still predict
+an elo_ranking by around 100 points as a margin of error. But we want a
+more precise model so we continue checking with other models.
+
+## Model 2
+
+Predicting win_ratio by looking at the scoring factor within the total
+matches played
+```{r}
+win_ratio_by_scoring_model <- lm(win_ratio ~ elo_rating + goals_ratio + count_matches, data = wc_elo)
+summary(win_ratio_by_scoring_model)
+```
+We will use 2014 Argentina to look at the accuracy of this model.
+
+2014 (year) Argentina (team) 2020 (elo rating) 4 (elo ranking) 6 (elo
+1yr change) 0.5310854 (win ratio) 1.884089 (goal ratio) 7 (match count)
+
+```{r}
+win_ratio_by_scoring <- data.frame(elo_rating = 2020, goals_ratio = 1.884089, count_matches = 7)
+predict(win_ratio_by_scoring_model, newdata = win_ratio_by_scoring)
+```
+The win ratio predicted by the model was 0.4909041, which was different
+from the actual win ratio by 0.0401813. The win ratio goes from 0 to 1,
+so for the win ratio of the actual value and the predicted to be off by
+0.04 points is pretty accurate and shows that the model is a good fit.
+
+# Conclusion/Explanations
+```{r, echo = FALSE} 
+model1_mae <- mean(abs(performance_based_elo_model$residuals))
+model2_mae <- mean(abs(win_ratio_by_scoring_model$residuals))
+
+cat("MAE for model 1 = ",  model1_mae, "\n")
+cat("MAE for model 2 = ",  model2_mae, "\n")
+```
+By looking at the Mean Absolute Error of each model, we can show that on
+average:
+
+-   the predicted elo_rating will be around ± 94.23273 off from the
+    actual elo_rating.
+-   the predicted win_ratio will be around ± 0.03855816 off from the
+    actual win_ratio
+
+
+# Random Forest
+## Model Check (2018 World Cup)
+
+```{r, warning=FALSE}
+library(randomForest)
+
+rf_model <- randomForest(count_matches ~ elo_rating + win_ratio + goals_ratio + elo_rank, data = wc_elo)
+
+wc_2018_prediction <- subset(wc_elo, world_cup_year == 2018)
+wc_2018_prediction <- wc_2018_prediction[, c("team_name", "win_ratio", "goals_ratio", "elo_rank", "elo_rating", "count_matches")]
+
+predicted_elo_2018 <- predict(rf_model, newdata = wc_2018_prediction)
+wc_2018_prediction$predicted_count_matches <- round(predicted_elo_2018)
+
+wc_2018_prediction$error <- wc_2018_prediction$predicted_count_matches - wc_2018_prediction$count_matches
+head(wc_2018_prediction)
+
+```
+We check the model by using the 2018 World Cup stats to predict how far each countries team will by looking at their count matches. We use stats like goals_ratio, win_ratio, elo_rank, and elo_rating using the randomForest model. After using the model and checking the predicted minus actual, we see that our model is not far off from predicting accurate match_counts for the teams. 
+
+```{r, echo = FALSE, warning=FALSE}
+source("RandomForestFunction.R")
+```
+### Accuracy Metrics 
+  - RMSE - Root mean square error: this being under 1 shows that the model was able to predict within the error margin of 1 which is good in predicting match_counts which are in 3-7 ranges
+  - MAE - Mean absolue error: this being under 1 as well shows the model accuracy was pretty muhc on point being not far away from the actual match_count
+  - MAPE - Mean absolute percentage error: this being under 10% represents a fit model that is able to predict the match_count with small margin of error
+```{r, warning=FALSE}
+count_match_prediction(1982)
+```
