@@ -3,63 +3,59 @@ source("00_requirements.R")
 
 count_match_prediction <- function(year) {
   library(randomForest)
+  library(dplyr)
   
-  national_ranks <- read.csv("data/national_ranking_soccer_1901-2023.csv")
+  # Load datasets
   wc_elo <- read.csv("data/primary_dataset_wc_elo.csv")
-  qualified_teams <- read.csv("data/qualified_teams.csv")
   
-  wc_elo$world_cup_year <- as.factor(wc_elo$world_cup_year)
-  wc_elo$team_name <- as.factor(wc_elo$team_name)
-  wc_elo$elo_rating <- as.numeric(wc_elo$elo_rating)
-  wc_elo$elo_rank <- as.numeric(wc_elo$elo_rank)
-  wc_elo$elo_1yr_change_rating <- as.numeric(wc_elo$elo_1yr_change_rating)
-  wc_elo$win_ratio <- as.numeric(wc_elo$win_ratio)
-  wc_elo$goals_ratio <- as.numeric(wc_elo$goals_ratio)
-  wc_elo$count_matches <- as.numeric(wc_elo$count_matches)
+  # Convert columns to appropriate types
+  wc_elo <- wc_elo %>%
+    mutate(
+      world_cup_year = as.factor(world_cup_year),
+      team_name = as.factor(team_name),
+      elo_rating = as.numeric(elo_rating),
+      elo_rank = as.numeric(elo_rank),
+      elo_1yr_change_rating = as.numeric(elo_1yr_change_rating),
+      win_ratio = as.numeric(win_ratio),
+      goals_ratio = as.numeric(goals_ratio),
+      count_matches = as.numeric(count_matches)
+    )
   
-  rf_model <- randomForest(count_matches ~ elo_rating + win_ratio + goals_ratio + elo_rank, data = wc_elo)
+  # Split into training and test sets
+  train_data <- wc_elo %>% filter(world_cup_year != year)
+  test_data  <- wc_elo %>% filter(world_cup_year == year)
   
-  
-  wc_year_prediction <- subset(wc_elo, world_cup_year == year)
-  
-  wc_year_prediction <- wc_year_prediction[, c("team_name", "win_ratio", "goals_ratio", "elo_rank", "elo_rating", "count_matches")]
-  
-  
-  predicted_elo_year <- predict(rf_model, newdata = wc_year_prediction)
-  
-  wc_year_prediction$predicted_count_matches <- round(predicted_elo_year)
-  
-  wc_year_prediction$error <- wc_year_prediction$predicted_count_matches - wc_year_prediction$count_matches
-  
-  # calculate the model accuracy in a data frame
-  actual <- wc_year_prediction$count_matches
-  pred <- wc_year_prediction$predicted_count_matches
-  
-  RMSE <- sqrt(mean((pred - actual)^2))
-  MAE <- mean(abs(pred - actual))
-  MAPE <- mean(abs((pred - actual) / actual)) * 100
-  
-  accuracy_df <- data.frame(
-    RMSE = RMSE,
-    MAE = MAE,
-    MAPE = MAPE
+  # Train Random Forest model
+  rf_model <- randomForest(
+    count_matches ~ elo_rating + win_ratio + goals_ratio + elo_rank,
+    data = train_data
   )
-  print(accuracy_df)
-  # end of accuracy calculations 
   
-  # graph the model for better visualization 
+  # Make predictions on test year
+  test_data$predicted_count_matches <- round(predict(rf_model, newdata = test_data))
+  
+  # Compute prediction error
+  test_data$error <- test_data$predicted_count_matches - test_data$count_matches
+  
+  # Compute accuracy metrics
+  actual <- test_data$count_matches
+  pred   <- test_data$predicted_count_matches
+  accuracy_df <- data.frame(
+    RMSE = sqrt(mean((pred - actual)^2)),
+    MAE  = mean(abs(pred - actual)),
+    MAPE = mean(abs((pred - actual) / actual)) * 100
+  )
+  
   barplot(
-    wc_year_prediction$error,
-    names.arg = wc_year_prediction$team_name,
+    test_data$error,
+    names.arg = test_data$team_name,
     las = 2,
     col = "skyblue",
-    main = "Prediction Error per Team",
+    main = paste("Prediction Error per Team -", year),
     ylab = "Error = Predicted - Actual"
   )
   abline(h = 0, col = "red", lwd = 2)
   
-  return (head(wc_year_prediction))
+  # Return predictions and accuracy
+  return(list(predictions = test_data, accuracy = accuracy_df))
 }
-
-
-
