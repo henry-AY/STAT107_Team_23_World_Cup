@@ -56,7 +56,7 @@ Additionally, you can knit the `FinalReport.Rmd` and it will install the require
 
 ### 3. Run the EDA and model R-Markdown files
 
-Run the `02_EDA.Rmd` and `03_project_models.Rmd` files, which will generate the necessary graphs and models.
+Run the `02_EDA.Rmd` and `03_project_models.Rmd` files, which will generate the graphs and models used in the project and analysis.
 
 These scripts perform:
 * Exploratory Data Analysis (EDA)
