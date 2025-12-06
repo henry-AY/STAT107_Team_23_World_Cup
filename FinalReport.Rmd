@@ -12,6 +12,8 @@ date: "2025-11-07"
 
 <div style="text-align: center; font-size: 18px;">
   [GitHub Repository: STAT107 Team 23 — World Cup Analysis](https://github.com/henry-AY/STAT107_Team_23_World_Cup)
+  
+  (https://github.com/henry-AY/STAT107_Team_23_World_Cup)
 </div>
 
 ```{r setup, include=FALSE}
@@ -189,5 +191,5 @@ Future steps we'd be interested in pursuing are incorporating additional feature
 * Henry Yost (25% Final report)
 * Jigar Patel (25% LM + Random Forest Model)
 * Davinia Muthalaly (25% EDA)
-* Davinia Muthalaly (25% Data Preprocessing)
+* Refugio Zepeda (25% Data Preprocessing)
 
