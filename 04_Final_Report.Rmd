@@ -1,5 +1,5 @@
 ---
-title: "Predicting How Many Matches Teams Will Play in a World Cup?"
+title: "Predicting How Many Matches a Team Will Play in a World Cup?"
 author: 
     - Team 23 - Jigar Patel, Henry Yost, Davinia Muthalaly, Refugio Zepeda
 output:
@@ -10,6 +10,10 @@ output:
 date: "2025-11-07"
 ---
 
+<div style="text-align: center; font-size: 18px;">
+  [GitHub Repository: STAT107 Team 23 — World Cup Analysis](https://github.com/henry-AY/STAT107_Team_23_World_Cup)
+</div>
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -19,9 +23,10 @@ knitr::opts_chunk$set(echo = TRUE)
 source("00_requirements.R")
 ```
 
-## Abstract
+## Abstract  
+This project looks at the key factors that predict how many matches a national team plays in the FIFA World Cup. Using data from the last ten tournaments, we used pre-tournament performance metrics including ELO, goal ratio, win ratio, and ranking trends. After data cleaning and pre-processing, we conducted exploratory visualizations to better understand our data and also determine what models would be best. Additionally, we built linear models and a random forest model to evaluate predictive strength. 
 
-> Write Abstract Here
+Our analysis shows that goal ratio and ELO rating are the strongest predictors of World Cup progression, showing a statistically significant relationship with match count. Linear models struggled with the nonlinear structure of the World Cup data, but the random forest model captured these complexities and predicted match counts within 1 to 1.5 games for the 2022 WC. Win ratio showed inconsistent significance in linear models, but remained relevant for non-linear modeling. These findings prove that predicting World Cup outcomes using only pre-tournament statistics remains a difficult challenge due to the nature of the game and tournament. Future work could incorperate player-levle metrics and group-stage performance to further improve predictive accuracy.
 
 ## Introduction 
 The purpose of this analysis is to examine the key factors that influence how many matches a national team plays in the World Cup. The primary question we seek to answer is: How many matches does a team play in a World Cup. We conduct statistical analysis using linear modeling as a baseline, to determine the impact of variables such as the rating/ELO, team rank, average # of goals scored in the season, etc... 
@@ -167,4 +172,11 @@ The Random Forest model predicts World Cup match counts with reasonable accuracy
 ## Conclusion
 
 This analysis demonstrates that pre-tournament performance metrics, particularly `goals_ratio` and `elo_rating` are strong predictors of how far a team will progress in the World Cup. The linear models we used were limited by the non-linear data, but the random forest model effectively captured the complex relationships, accurately predicting typically within one match of the actual results. Interestingly, while `win_ratio` showed unstable significance in linear models, it remains a relevant factor for the non-linear modeling. Overall, the random forest model provided a relatively strong framework for learning and predicting match counts for a previous WC. The high error values show that World Cup progression is difficult to predict with only pre-tournament stats, and there's inherent randomness. Future steps we'd be interested in pursuing are incorporating additional features such as player statistics, injuries, and additional group-stage metrics to improve the predictive accuracy. 
+
+## Contributions
+
+* Henry Yost (25% Final report)
+* Jigar Patel (25% LM + Random Forest Model)
+* Davinia Muthalaly (25% EDA)
+* Davinia Muthalaly (25% Data Preprocessing)
 
