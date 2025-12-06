@@ -4,8 +4,10 @@
 
 STAT107 World Cup Prediction Project
 
-      source("00_requirements.R")
-      source("clean_group_standings.R")
+      00_requirements.R
+      01_dataset_preprocessing.R
+
+The first file is the requirements file. This is absolutely necessary to run, otherwise the code will not work.
 
 This was our data cleaning and processing code, as well as the libraries we used. We used the read_csv() to view our 
 data set in R and then proceeded to clean the data set of any white spaces and clean the text of anything that would
@@ -40,6 +42,7 @@ cd STAT107-WorldCup-Prediction-Project
 Make sure you have R (≥ 4.0) and RStudio installed and launch RStudio.
 
 Then install the required packages by running the following in your R console:
+Additionally, you can run the `FinalReport.Rmd` and it will install the requirements.
 ```bash
 # Install required libraries
 source("00_requirements.R")
@@ -47,11 +50,12 @@ source("00_requirements.R")
 
 ### 3. Run Exploratory Data Analysis on `group_standings.csv`
 
-Run the `EDA_groupstandings.rmd` and `PreliminaryEDA.R` files, which will generate the necessary graphs.
+Run the `02_EDA.Rmd` and `03_project_models.Rmd` files, which will generate the necessary graphs and models.
 
 These scripts perform:
 * Exploratory Data Analysis (EDA)
 * Visualizations and relationships between variables
+* 
 
 ### 5. Final Report
 Finally, to view the compiled progress report, open `FinalReport.Rmd` in RStudio and knit it to generate `FinalReport.pdf`.

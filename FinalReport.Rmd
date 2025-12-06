@@ -34,13 +34,13 @@ The analysis is valuable to sports betters and large sports-oriented industries 
 We approached this project, by first selecting two datasets that include information all the way from the early 20th century. However, because soccer has changed so much in recent years, we decided it would be best to only use the last 10 world cups as data (1982 - present). First, we trained a regression model on our cleaned data to determine the variables that are most significant for predicting how many matches a team plays in the WC. Additionally, this was used as a baseline model and a sanity check to verify our data is accurate to what we would expect. The results will give us a clearer picture of understanding how teams perform in the WC, based on the variables in the datasets, helping stakeholders to make more informed decisions in world cup games.
 
 ## Data
-The data used for this analysis was sourced both from open-source GitHub repositories, a popular platform for sharing data and code projects, that provides publicly available data. The first dataset is from [JGavier](https://github.com/JGravier/soccer-ELO/blob/main/csv/ranking_soccer_1901-2023.csv), which includes data from 1901 to present day, with variables: rank, ELO, rating/rank changes, and total yearly match data. 
+The data used for this analysis was sourced both from open-source GitHub repositories, a popular platform for sharing data and code projects, that provides publicly available data. The first dataset is from JGavier [(Link)](https://github.com/JGravier/soccer-ELO/blob/main/csv/ranking_soccer_1901-2023.csv), which includes data from 1901 to present day, with variables: rank, ELO, rating/rank changes, and total yearly match data. 
 
 ELO is a formulaic way to represent team strength ratings in a weighted manner for any tournament-based event. The formula used to calculate the ELO values comes from [eloratings.net](https://www.eloratings.net/about).
 $$R_n = R_o + K \times (W - W_e)$$
 Where, $R_n$ is the new rating, $R_o$ is the pre-match rating, $K$ is a constant weight for the tournaments played. $W$ is the result of the game (1 for win, 0.5 for draw, 0 for loss) and $W_e$ is the win expectancy from previous data and team strength.
 
-The second dataset we used was sources from [Jfjelstul](https://github.com/jfjelstul/worldcup/blob/master/data-csv/qualified_teams.csv), a Ph.D developer interested in World Cup data. This dataset includes data all the way from 1930 - present, including variables: number of matches played for that team in the WC of that year, and their performance (categorical: `group stage`, `first round`, `semi-finals`, etc...)
+The second dataset we used was sources from Jfjelstul [(Link)](https://github.com/jfjelstul/worldcup/blob/master/data-csv/qualified_teams.csv), a Ph.D developer interested in World Cup data. This dataset includes data all the way from 1930 - present, including variables: number of matches played for that team in the WC of that year, and their performance (categorical: `group stage`, `first round`, `semi-finals`, etc...)
 During the process of joining both datasets, we also calculated additional values we thought would have a significant impact in a teams performance in the world-cup:
 * `win_ratio`: the number of wins divided by the number of total games; this variable gives us an idea of their W/L ratio, which can be valuable in determining how far a team will get in the WC.
 * `goals_ratio`: the number of goals divided by the total number of games; this variable gives us an idea of the average number of goals per game.
@@ -64,11 +64,11 @@ Our cleaned dataset includes the following variables:
 
 ## Visualization
 
-We used several visualization techniques in order to asses the correlation and nature of our variables and data to determine optimal tests and models to use for our project. These first set of graphs include visualizations, to explore the dataset, which will be further explored bELOw:
+We used several visualization techniques in order to asses the correlation and nature of our variables and data to determine optimal tests and models to use for our project. These first set of graphs include visualizations, to explore the dataset, which will be further explored below:
 
 ### Goals vs. ELO Ratings
 
-```{r, echo = FALSE, warning = FALSE, message=FALSE, fig.width=5, fig.height=4, fig.align='center'}
+```{r, echo = FALSE, warning = FALSE, message=FALSE, out.width="60%", fig.align='center'}
 source("02_01_EDA_graphs.R")
 wc <- load_wc_elo()
 
@@ -79,7 +79,7 @@ This scatterplot plots the Goals scored for per match in the World Cup versus th
 
 ### Goals Per Match over years for Top−Scoring Teams
 
-```{r, echo = FALSE, warning = FALSE, fig.width=5, fig.height=3, fig.align='center'}
+```{r, echo = FALSE, warning = FALSE, out.width="65%", fig.align='center'}
 plot_goals_over_time(wc)
 ```
 
@@ -89,7 +89,7 @@ This line graph tracks how the highest-scoring teams in our dataset from various
 
 Here, we can visualize and assess how the key numeric variables in our dataset (ELO rating, recent performance, match count, and goal scoring) all relate with one another.
 
-```{r, echo = FALSE, warning = FALSE, fig.width=5, fig.height=4, fig.align='center'}
+```{r, echo = FALSE, warning = FALSE, out.width="70%", fig.align='center'}
 plot_corr_heatmap(wc)
 ```
 
@@ -169,9 +169,20 @@ kable(results$accuracy, caption = "Model Accuracy Metrics")
 ```
 The Random Forest model predicts World Cup match counts with reasonable accuracy: RMSE ≈ 1.43, meaning predictions are typically within one match to 1.5 matches; MAE ≈ 1, indicating average errors are about 1 match; and MAPE ≈ 24.65% which is relatively high magnitude considering the small range of match counts. Overall, this suggests that the random forest model is moderately strong in predictions with an average of +/- 1.5 games for the majority of the teams.
 
+### Random Forest 
+```{r, warning=FALSE, echo=FALSE, out.width="85%", fig.align='center'}
+source("04_model_bias.R")
+plot_pred_vs_actual(results$predictions)
+```
+Additionally the scatter plot confirms the Random Forest model's accuracy, and additionally some of our EDA findings. The majority of the points cluster near/around the red dashed line, which represents perfect prediction from the model. This scatter plot validates our findings of an RMSE of 1.43 matches. Additionally, we're able to immediately identify outlines, such as Germany and Morocco that were significantly over/underestimated. This suggests that the model failed to learn from highly specific data that made the team win/lose more. This is an interesting finding, and similar to what our EDA found in the scatter plot and heat map, that because of the randomness of the tournament, the model would benefit from additional data: player metrics, injuries, etc...
+
 ## Conclusion
 
-This analysis demonstrates that pre-tournament performance metrics, particularly `goals_ratio` and `elo_rating` are strong predictors of how far a team will progress in the World Cup. The linear models we used were limited by the non-linear data, but the random forest model effectively captured the complex relationships, accurately predicting typically within one match of the actual results. Interestingly, while `win_ratio` showed unstable significance in linear models, it remains a relevant factor for the non-linear modeling. Overall, the random forest model provided a relatively strong framework for learning and predicting match counts for a previous WC. The high error values show that World Cup progression is difficult to predict with only pre-tournament stats, and there's inherent randomness. Future steps we'd be interested in pursuing are incorporating additional features such as player statistics, injuries, and additional group-stage metrics to improve the predictive accuracy. 
+This analysis shows that pre-tournament performance metrics particularly, `goals_ratio` and `elo_ratig` are strong predictors of how far a team will progress in the World Cup. The linear models helped confirm which features mattered, but they were limited by the non-linear data. However, the Random Forest model was able to learn the complex relationships, predicting typically within one match of the actual results of the 2022 World Cup.
+
+The model's biggest misses (Germany, and Morocco) show the limits of our data, and purely relying on team-level statistics for the past 10 world cups. Human-nature, such as injuries, player substitutions, rivalries, all introduce significant noise that exist in performance metrics. As a result, the errors aren't a failure on the Random Forest, but it rather reflects the relatively chaotic nature of the World Cup. 
+
+Future steps we'd be interested in pursuing are incorporating additional features such as player statistics, injuries, and additional group-stage metrics to improve the predictive accuracy. This would enable us from going to "decently correct" to a competitive model for forecasting the upcoming World Cup.
 
 ## Contributions
 
